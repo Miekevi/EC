@@ -18,6 +18,10 @@ if not os.path.exists(experiment_name):
 for en in range(1, 9):
     env = Environment(experiment_name=experiment_name,
                       enemymode='static',
+                      speed="normal",
+                      sound="on",
+                      fullscreen=True,
+                      use_joystick=True,
                       playermode='human')
     env.update_parameter('enemies', [en])
     env.play()

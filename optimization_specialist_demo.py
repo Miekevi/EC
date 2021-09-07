@@ -18,15 +18,23 @@ from math import fabs,sqrt
 import glob, os
 
 
+# choose this for not using visuals and thus making experiments faster
+headless = True
+if headless:
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+
 experiment_name = 'individual_demo'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
+
+n_hidden_neurons = 10
 
 # initializes simulation in individual evolution mode, for single static enemy.
 env = Environment(experiment_name=experiment_name,
                   enemies=[2],
                   playermode="ai",
-                  player_controller=player_controller(),
+                  player_controller=player_controller(n_hidden_neurons),
                   enemymode="static",
                   level=2,
                   speed="fastest")
@@ -36,7 +44,7 @@ env = Environment(experiment_name=experiment_name,
 env.state_to_log() # checks environment state
 
 
-####   Optimization for controller solution (best genotype/weights for perceptron phenotype network)  ###
+####   Optimization for controller solution (best genotype-weights for phenotype-network): Ganetic Algorihm    ###
 
 ini = time.time()  # sets time marker
 
@@ -45,8 +53,10 @@ ini = time.time()  # sets time marker
 
 run_mode = 'train' # train or test
 
-n_hidden = 10
-n_vars = (env.get_num_sensors()+1)*n_hidden + (n_hidden+1)*5 # multilayer with 10 hidden neurons
+# number of weights for multilayer with 10 hidden neurons
+n_vars = (env.get_num_sensors()+1)*n_hidden_neurons + (n_hidden_neurons+1)*5
+
+
 dom_u = 1
 dom_l = -1
 npop = 100
