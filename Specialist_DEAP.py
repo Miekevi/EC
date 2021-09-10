@@ -19,8 +19,8 @@ output_path = 'outputs/'
 if not os.path.exists(output_path + experiment_name):
     os.makedirs(output_path + experiment_name)
 
-# set running mode ("train" or "test")
-run_mode = "train"
+# if evaluate is true we evaluate our best saved solution
+evaluate = True
 
 
 ########### initializing game variables ##########
@@ -64,17 +64,19 @@ def evaluate_pop(x):
     return np.array(list(map(lambda y: simulation(env,y), x)))
 
 
-########### if running mode is 'test', only evaluate and exit ##########
+########### if evaluate is true, only evaluate and exit ##########
 
 # loads file with the best solution for testing
-if run_mode =='test':
-
-    best_sol = np.loadtxt('outputs/'+experiment_name+'/best.txt')
-    print( '\n RUNNING SAVED BEST SOLUTION \n')
-    env.update_parameter('speed','normal')
-    evaluate([best_sol])
-
-    sys.exit(0)
+if evaluate:
+    try:
+        best_sol = np.loadtxt('outputs/'+experiment_name+'/best.txt')
+        print('\n --------- Running best saved solution ---------- \n')
+        env.update_parameter('speed','normal')
+        evaluate([best_sol])
+    except IOError:
+        print('ERROR: Solution to be evaluated cannot be found!')
+    finally:
+        sys.exit(0)
 
 
 ########### initialing DEAP tools ##########
@@ -90,10 +92,10 @@ tbx.register("individual", tools.initRepeat, creator.Individual, tbx.variable, n
 tbx.register("population", tools.initRepeat, list, tbx.individual) # set population instantiation function
 
 # evolution properties
+tbx.register("evaluate", evaluate_ind)
+tbx.register("select", tools.selTournament, tournsize=3)
 tbx.register("mate", tools.cxTwoPoint)
 tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
-tbx.register("select", tools.selTournament, tournsize=3)
-tbx.register("evaluate", evaluate_ind)
 
 pop = tbx.population(n=npop) # instantiate population
 
@@ -113,7 +115,7 @@ mean_sol = np.mean(fitnesses)
 std_sol = np.std(fitnesses)
 print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
 
-for i in range(1,generations+1):
+for i in range(1, generations+1):
     
     # Select the next generation individuals
     offspring = tbx.select(pop, len(pop))
