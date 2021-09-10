@@ -9,7 +9,7 @@ from deap import base, creator, tools
 ########### initializing file variables ##########
 
 # disable visuals for faster experiments
-visuals = False
+visuals = T
 if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
