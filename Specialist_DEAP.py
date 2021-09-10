@@ -4,7 +4,7 @@ import numpy as np
 sys.path.insert(0, 'evoman')
 from evoman.environment import Environment
 from demo_controller import player_controller
-
+from deap import base, creator, tools
 
 ########### initializing file variables ##########
 
@@ -27,12 +27,10 @@ run_mode = "train"
 
 n_hidden_neurons = 10
 
+npop = 50          # population size
+generations = 50    # number of generations
 dom_u = 1           # upper bound weight
 dom_l = -1          # lower bound weight
-npop = 100          # population size
-generations = 30    # number of generations
-mutation = 0.2      # mutation constant
-last_best = 0  
 
 
 ########### initializing game ##########
@@ -45,7 +43,7 @@ env = Environment(experiment_name=experiment_name,
                     enemymode="static",
                     level=2,
                     speed="fastest",
-                    savelogs="no")
+                    savelogs="no") # enabling this gives error because we log the output to 'outputs/<exp_name>'
 
 # logs the environment state
 env.state_to_log()
@@ -57,10 +55,13 @@ def simulation(env,x):
     fitness, player_life, enemy_life, time = env.play(pcont=x)
     return fitness
 
-def evaluate(x):
-    return np.array(list(map(lambda y: simulation(env,y), x)))
+def evaluate_ind(x):
+    x = np.array(x)
+    return np.array(simulation(env,x))
 
-# and some more...
+def evaluate_pop(x):
+    x = np.array(x)
+    return np.array(list(map(lambda y: simulation(env,y), x)))
 
 
 ########### if running mode is 'test', only evaluate and exit ##########
@@ -68,7 +69,7 @@ def evaluate(x):
 # loads file with the best solution for testing
 if run_mode =='test':
 
-    best_sol = np.loadtxt(experiment_name+'/best.txt')
+    best_sol = np.loadtxt('outputs/'+experiment_name+'/best.txt')
     print( '\n RUNNING SAVED BEST SOLUTION \n')
     env.update_parameter('speed','normal')
     evaluate([best_sol])
@@ -76,16 +77,72 @@ if run_mode =='test':
     sys.exit(0)
 
 
-########### generating initial population ##########
+########### initialing DEAP tools ##########
 
-# calculate number of variables
 n_vars = (env.get_num_sensors()+1)*n_hidden_neurons + (n_hidden_neurons+1)*5
-print("\nVariables: {0} weights per individual.".format(n_vars))
 
-# generate pupulation with size=npop, variables=nvars, lower, upper bounds=dom_l,dom_u
-pop = np.random.uniform(dom_l, dom_u, (npop, n_vars))
-# runs simulation for every individual, saves list of fitnesses (n=npop) as fit_pop
-fit_pop = evaluate(pop)
+creator.create("FitnessMax", base.Fitness, weights = (1.0,))    # create maximization problem class
+creator.create("Individual", list, fitness=creator.FitnessMax)  # link individual class to maximization problem class
 
-for i in range(generations):
-    print(i)
+tbx = base.Toolbox()
+tbx.register("variable", np.random.uniform, dom_l, dom_u) # set variable instantiation function
+tbx.register("individual", tools.initRepeat, creator.Individual, tbx.variable, n=n_vars) # set individual instantiation function
+tbx.register("population", tools.initRepeat, list, tbx.individual) # set population instantiation function
+
+# evolution properties
+tbx.register("mate", tools.cxTwoPoint)
+tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+tbx.register("select", tools.selTournament, tournsize=3)
+tbx.register("evaluate", evaluate_ind)
+
+pop = tbx.population(n=npop) # instantiate population
+
+
+########### evolution ##########
+# based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
+CXPB, MUTPB = 0.5, 0.2
+
+# Evaluate the entire population
+print("\nGENERATION 0")
+fitnesses = evaluate_pop(pop)
+for ind, fit in zip(pop, fitnesses):
+    ind.fitness.values = [fit]
+
+best_sol = np.max(fitnesses)
+mean_sol = np.mean(fitnesses)
+std_sol = np.std(fitnesses)
+print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
+
+for i in range(1,generations+1):
+    
+    # Select the next generation individuals
+    offspring = tbx.select(pop, len(pop))
+    # Clone the selected individuals
+    offspring = list(map(tbx.clone, offspring))
+
+    # Apply crossover and mutation on the offspring
+    for child1, child2 in zip(offspring[::2], offspring[1::2]):
+        if np.random.rand() < CXPB:
+            tbx.mate(child1, child2)
+            del child1.fitness.values
+            del child2.fitness.values
+
+    for mutant in offspring:
+        if np.random.rand() < MUTPB:
+            tbx.mutate(mutant)
+            del mutant.fitness.values
+
+    print("\nGENERATION {0}".format(i))
+    # Evaluate the individuals with an invalid fitness
+    invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+    fitnesses = evaluate_pop(pop)
+    for ind, fit in zip(pop, fitnesses):
+        ind.fitness.values = [fit]
+
+    # The population is entirely replaced by the offspring
+    pop[:] = offspring
+
+    best_sol = np.max(fitnesses)
+    mean_sol = np.mean(fitnesses)
+    std_sol = np.std(fitnesses)
+    print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
