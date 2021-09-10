@@ -27,7 +27,7 @@ evaluate = False
 
 n_hidden_neurons = 10
 
-npop = 50          # population size
+npop = 50           # population size
 generations = 50    # number of generations
 dom_u = 1           # upper bound weight
 dom_l = -1          # lower bound weight
@@ -118,7 +118,7 @@ print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
 for i in range(1, generations+1):
     
     # Select the next generation individuals
-    offspring = tbx.select(pop, len(pop))
+    offspring = tbx.select(pop, len(pop)) 
     # Clone the selected individuals
     offspring = list(map(tbx.clone, offspring))
 
@@ -144,7 +144,7 @@ for i in range(1, generations+1):
     # The population is entirely replaced by the offspring
     pop[:] = offspring
 
-    best_sol = np.max(fitnesses)
-    mean_sol = np.mean(fitnesses)
-    std_sol = np.std(fitnesses)
-    print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
+    best_fitness = np.max(fitnesses)
+    mean_fitness = np.mean(fitnesses)
+    std_fitness = np.std(fitnesses)
+    print("\nBest: {0}, Mean: {1}, std: {2}".format(best_fitness, mean_fitness, std_fitness))
