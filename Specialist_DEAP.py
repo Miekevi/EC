@@ -20,7 +20,7 @@ if not os.path.exists(output_path + experiment_name):
     os.makedirs(output_path + experiment_name)
 
 # if evaluate is true we evaluate our best saved solution
-evaluate = True
+evaluate = False
 
 
 ########### initializing game variables ##########
