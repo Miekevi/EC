@@ -9,7 +9,7 @@ from deap import base, creator, tools
 ########### initializing file variables ##########
 
 # disable visuals for faster experiments
-visuals = T
+visuals = False
 if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -105,7 +105,7 @@ pop = tbx.population(n=npop) # instantiate population
 CXPB, MUTPB = 0.5, 0.2
 
 # Evaluate the entire population
-print("\nGENERATION 0")
+print("\n ----- GENERATION 0 -----")
 fitnesses = evaluate_pop(pop)
 for ind, fit in zip(pop, fitnesses):
     ind.fitness.values = [fit]
@@ -134,7 +134,7 @@ for i in range(1, generations+1):
             tbx.mutate(mutant)
             del mutant.fitness.values
 
-    print("\nGENERATION {0}".format(i))
+    print("\n ----- GENERATION {0} -----".format(i))
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
     fitnesses = evaluate_pop(pop)
@@ -148,3 +148,5 @@ for i in range(1, generations+1):
     mean_fitness = np.mean(fitnesses)
     std_fitness = np.std(fitnesses)
     print("\nBest: {0}, Mean: {1}, std: {2}".format(best_fitness, mean_fitness, std_fitness))
+
+print("\n ----- SIMULATION ENDED -----")
