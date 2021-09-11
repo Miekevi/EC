@@ -15,9 +15,9 @@ if not visuals:
 
 # setting experiment name and creating folder for logs
 experiment_name = "Specialist_DEAP"
-output_path = 'outputs/'
-if not os.path.exists(output_path + experiment_name):
-    os.makedirs(output_path + experiment_name)
+output_folder = 'outputs/'
+if not os.path.exists(output_folder + experiment_name):
+    os.makedirs(output_folder + experiment_name)
 
 # if evaluate is true we evaluate our best saved solution
 evaluate = False
@@ -35,12 +35,11 @@ dom_l = -1          # lower bound weight
 enemies = [1,2,3]
 
 
-########### initializing game ##########
-
-envs = []
+########### initializing game(s) ##########
 
 # initialize simulations in individual evolution mode, for every enemy.
 
+envs = []
 for enemy in enemies:
     env = Environment(experiment_name=experiment_name,
                         enemies=[enemy],
@@ -146,6 +145,8 @@ for enemy, env in zip(enemies, envs):
             if np.random.rand() < MUTPB:
                 tbx.mutate(mutant)
                 del mutant.fitness.values
+
+        # TODO: implement normalisation
 
         print("\n ----- GENERATION {0} -----".format(i))
         
