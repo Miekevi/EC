@@ -16,8 +16,6 @@ if not visuals:
 # setting experiment name and creating folder for logs
 experiment_name = "Specialist_DEAP"
 output_folder = 'outputs/'
-if not os.path.exists(output_folder + experiment_name):
-    os.makedirs(output_folder + experiment_name)
 
 # if evaluate is true we evaluate our best saved solution
 evaluate = False
@@ -113,6 +111,9 @@ CXPB, MUTPB = 0.5, 0.2
 for enemy, env in zip(enemies, envs):
 
     # TODO: redefine output path for every enemy
+    exp_path = output_folder + experiment_name + '_' + str(enemy)
+    if not os.path.exists(exp_path):
+        os.makedirs(exp_path)
 
     print("\n ----- SIMULATING FOR ENEMY {0}".format(enemy))
 
