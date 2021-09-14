@@ -61,7 +61,7 @@ def simulation(x, env):
 
 def evaluate_ind(x, env):
     x = np.array(x)
-    return np.array(simulation(env,x))
+    return np.array(simulation(x, env))
 
 def evaluate_pop(x, env):
     x = np.array(x)
@@ -77,12 +77,10 @@ if evaluate:
             best_sol = np.loadtxt('outputs/'+experiment_name+'_'+str(enemy)+'/best.txt') # loads solution from outputs/{expname}_{enemy}/best.txt
             print('\n --------- Running best saved solution for enemy '+str(enemy)+' ---------- \n')
             env.update_parameter('speed','normal')
-            evaluate_ind([best_sol], env)
+            evaluate_ind(best_sol, env)
         except IOError:
             print('ERROR: Solution to be evaluated for enemy {0} cannot be found!'.format(str(enemy)))
-        finally:
-            sys.exit(0)
-
+        
 
 ########### initialing DEAP tools ##########
 
