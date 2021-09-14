@@ -25,10 +25,11 @@ evaluate = False
 
 n_hidden_neurons = 10
 
-npop = 5           # population size
-generations = 2    # number of generations
-dom_u = 1           # upper bound weight
-dom_l = -1          # lower bound weight
+npop = 10               # population size
+generations = 20        # number of generations
+early_stopping = 5      # stop if fitness hasn't improved for x rounds   
+dom_u = 1               # upper bound weight
+dom_l = -1              # lower bound weight
 
 enemies = [1,2,3]
 
@@ -101,21 +102,24 @@ tbx.register("select", tools.selTournament, tournsize=3)
 tbx.register("mate", tools.cxTwoPoint)
 tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
 
-pop = tbx.population(n=npop) # instantiate population
-
 
 ########### evolution ##########
 # based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
 CXPB, MUTPB = 0.5, 0.2
 
 for enemy, env in zip(enemies, envs):
-
-    # TODO: redefine output path for every enemy
+    
+    # redefine output path for every enemy
     exp_path = output_folder + experiment_name + '_' + str(enemy)
     if not os.path.exists(exp_path):
         os.makedirs(exp_path)
 
     print("\n ----- SIMULATING FOR ENEMY {0}".format(enemy))
+
+    # instantiate population
+    pop = tbx.population(n=npop) 
+    best_fit_exp = 0
+    rnds_not_improved = 0
 
     # Evaluate the entire population
     print("\n ----- GENERATION 0 -----")
@@ -123,10 +127,21 @@ for enemy, env in zip(enemies, envs):
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = [fit]
 
-    best_sol = np.max(fitnesses)
-    mean_sol = np.mean(fitnesses)
-    std_sol = np.std(fitnesses)
-    print("\nBest: {0}, Mean: {1}, std: {2}".format(best_sol, mean_sol, std_sol))
+    best_fit = np.max(fitnesses)
+    mean_fit = np.mean(fitnesses)
+    std_fit = np.std(fitnesses)
+
+    # saves results for first population
+    file_aux  = open(exp_path+'/results.txt','w')
+    file_aux.write('gen best mean std')
+    print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format("0", best_fit, mean_fit, std_fit))
+    file_aux.write("\n0 " + str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
+    file_aux.close()
+
+    # save new best fitness if better than current
+    if best_fit > best_fit_exp:
+        best_idx = np.argmax(fitnesses) # returns index of maximum
+        np.savetxt(exp_path+'/best.txt', pop[best_idx])
 
     for i in range(1, generations+1):
         
@@ -160,9 +175,27 @@ for enemy, env in zip(enemies, envs):
         # The population is entirely replaced by the offspring
         pop[:] = offspring
 
-        best_fitness = np.max(fitnesses)
-        mean_fitness = np.mean(fitnesses)
-        std_fitness = np.std(fitnesses)
-        print("\nBest: {0}, Mean: {1}, std: {2}".format(best_fitness, mean_fitness, std_fitness))
+        best_fit = np.max(fitnesses)
+        mean_fit = np.mean(fitnesses)
+        std_fit = np.std(fitnesses)
+
+        # saves results for each generation
+        file_aux  = open(exp_path+'/results.txt','a')
+        print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
+        file_aux.write("\n" + str(i) + ' ' +  str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
+        file_aux.close()
+
+
+        # save new best fitness if better than current
+        if best_fit > best_fit_exp:
+            best_idx = np.argmax(fitnesses) # returns index of maximum
+            np.savetxt(exp_path+'/best.txt', pop[best_idx])
+            rnds_not_improved = 0
+        else:
+            rnds_not_improved += 1
+
+        if rnds_not_improved == early_stopping:
+            print("\n ##### Fitness has not improved in {0} rounds, stopping simulation...".format(early_stopping))
+            break
 
     print("\n ----- SIMULATION FOR ENEMY {0} IS COMPLETED -----".format(enemy))
