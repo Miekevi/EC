@@ -176,7 +176,7 @@ for enemy, env in zip(enemies, envs):
         # The population is entirely replaced by the offspring
         pop[:] = offspring
 
-        # calculate population fitness
+        # set new population fitness
         fitnesses = [ind.fitness.values for ind in pop]
         
         best_fit = np.max(fitnesses)
