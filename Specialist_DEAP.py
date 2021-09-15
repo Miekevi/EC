@@ -25,13 +25,16 @@ evaluate = False
 
 n_hidden_neurons = 10
 
-npop = 10               # population size
-generations = 20        # number of generations
-early_stopping = 5      # stop if fitness hasn't improved for x rounds   
+npop = 100              # population size
+generations = 500       # number of generations
+early_stopping = 25     # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
+CXPB = 1                # crossover (mating) prob
+MUTPB = 0.3             # mutation prob
 
-enemies = [1,2,3]
+
+enemies = [1]           # can be [1,2,3]
 
 
 ########### initializing game(s) ##########
@@ -96,14 +99,13 @@ tbx.register("population", tools.initRepeat, list, tbx.individual) # set populat
 
 # evolution properties
 tbx.register("evaluate", evaluate_ind)
-tbx.register("select", tools.selTournament, tournsize=3)
+tbx.register("select", tools.selTournament, tournsize=5)
 tbx.register("mate", tools.cxTwoPoint)
 tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
 
 
 ########### evolution ##########
 # based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
-CXPB, MUTPB = 0.5, 0.2
 
 for enemy, env in zip(enemies, envs):
     
@@ -164,8 +166,7 @@ for enemy, env in zip(enemies, envs):
 
         print("\n ----- GENERATION {0} -----".format(i))
         
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        # Evaluate population again
         fitnesses = evaluate_pop(pop, env)
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = [fit]
