@@ -83,7 +83,8 @@ if evaluate:
             evaluate_ind(best_sol, env)
         except IOError:
             print('ERROR: Solution to be evaluated for enemy {0} cannot be found!'.format(str(enemy)))
-        
+    sys.exit()
+
 
 ########### initialing DEAP tools ##########
 
@@ -99,9 +100,9 @@ tbx.register("population", tools.initRepeat, list, tbx.individual) # set populat
 
 # evolution properties
 tbx.register("evaluate", evaluate_ind)
-tbx.register("select", tools.selTournament, tournsize=5)
+tbx.register("select", tools.selTournament, tournsize=3)
 tbx.register("mate", tools.cxTwoPoint)
-tbx.register("mutate", tools.mutShuffleIndexes, indpb=0.5)
+tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 
 
 ########### evolution ##########
@@ -160,9 +161,8 @@ for enemy, env in zip(enemies, envs):
         for mutant in offspring:
             if np.random.rand() < MUTPB:
                 tbx.mutate(mutant)
+                mutant.self = np.linalg.norm(mutant) # normalize
                 del mutant.fitness.values
-
-        # TODO: implement normalisation
 
         print("\n ----- GENERATION {0} -----".format(i))
         
