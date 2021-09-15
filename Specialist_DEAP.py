@@ -27,11 +27,11 @@ n_hidden_neurons = 10
 
 npop = 100              # population size
 generations = 500       # number of generations
-early_stopping = 25     # stop if fitness hasn't improved for x rounds   
+early_stopping = 100    # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
-CXPB = 1                # crossover (mating) prob
-MUTPB = 0.3             # mutation prob
+CXPB = 0.5              # crossover (mating) prob
+MUTPB = 0.2             # mutation prob
 
 
 enemies = [1]           # can be [1,2,3]
@@ -101,7 +101,7 @@ tbx.register("population", tools.initRepeat, list, tbx.individual) # set populat
 tbx.register("evaluate", evaluate_ind)
 tbx.register("select", tools.selTournament, tournsize=5)
 tbx.register("mate", tools.cxTwoPoint)
-tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+tbx.register("mutate", tools.mutShuffleIndexes, indpb=0.5)
 
 
 ########### evolution ##########
@@ -166,14 +166,19 @@ for enemy, env in zip(enemies, envs):
 
         print("\n ----- GENERATION {0} -----".format(i))
         
-        # Evaluate population again
-        fitnesses = evaluate_pop(pop, env)
-        for ind, fit in zip(pop, fitnesses):
+        # Evaluate newcomers to the population
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        invalid_fit = np.array(list(map(lambda x: tbx.evaluate(x, env), invalid_ind)))
+        for ind, fit in zip(invalid_ind, invalid_fit):
             ind.fitness.values = [fit]
 
+        
         # The population is entirely replaced by the offspring
         pop[:] = offspring
 
+        # calculate population fitness
+        fitnesses = [ind.fitness.values for ind in pop]
+        
         best_fit = np.max(fitnesses)
         mean_fit = np.mean(fitnesses)
         std_fit = np.std(fitnesses)
