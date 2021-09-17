@@ -25,16 +25,16 @@ evaluate = False
 
 n_hidden_neurons = 10
 
-npop = 100              # population size
-generations = 500       # number of generations
-early_stopping = 100    # stop if fitness hasn't improved for x rounds   
+npop = 10               # population size
+generations = 5         # number of generations
+early_stopping = 25     # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
 CXPB = 0.5              # crossover (mating) prob
 MUTPB = 0.2             # mutation prob
 
-
 enemies = [1]           # can be [1,2,3]
+runs_per_enemy = 10     
 
 
 ########### initializing game(s) ##########
@@ -109,97 +109,104 @@ tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 # based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
 
 for enemy, env in zip(enemies, envs):
-    
-    # redefine output path for every enemy
-    exp_path = output_folder + experiment_name + '_' + str(enemy)
+
+    # redefine output folder for every enemy
+    exp_path = output_folder + experiment_name + '_en' + str(enemy)
     if not os.path.exists(exp_path):
         os.makedirs(exp_path)
 
-    print("\n ----- SIMULATING FOR ENEMY {0}".format(enemy))
+    for run in range(1, runs_per_enemy+1):
 
-    # instantiate population
-    pop = tbx.population(n=npop) 
-    best_fit_exp = 0
-    rnds_not_improved = 0
+        # redefine output folder for every run
+        exp_path_run = exp_path + '_run' + str(run)
+        if not os.path.exists(exp_path_run):
+            os.makedirs(exp_path_run)
 
-    # Evaluate the entire population
-    print("\n ----- GENERATION 0 -----")
-    fitnesses = evaluate_pop(pop, env)
-    for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = [fit]
+        print("\n ----- SIMULATING FOR ENEMY {0}, run {1} -----".format(enemy, run))
+        print("Writing outputs to " + exp_path_run)
 
-    best_fit = np.max(fitnesses)
-    mean_fit = np.mean(fitnesses)
-    std_fit = np.std(fitnesses)
+        # instantiate population
+        pop = tbx.population(n=npop) 
+        best_fit_exp = 0
+        rnds_not_improved = 0
 
-    # saves results for first population
-    file_aux  = open(exp_path+'/results.txt','w')
-    file_aux.write('gen best mean std')
-    print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format("0", best_fit, mean_fit, std_fit))
-    file_aux.write("\n0 " + str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
-    file_aux.close()
-
-    # save new best fitness if better than current
-    if best_fit > best_fit_exp:
-        best_idx = np.argmax(fitnesses) # returns index of maximum
-        np.savetxt(exp_path+'/best.txt', pop[best_idx])
-
-    for i in range(1, generations+1):
-        
-        # Select the next generation individuals
-        offspring = tbx.select(pop, len(pop)) 
-        # Clone the selected individuals
-        offspring = list(map(tbx.clone, offspring))
-
-        # Apply crossover and mutation on the offspring
-        for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if np.random.rand() < CXPB:
-                tbx.mate(child1, child2)
-                del child1.fitness.values
-                del child2.fitness.values
-
-        for mutant in offspring:
-            if np.random.rand() < MUTPB:
-                tbx.mutate(mutant)
-                mutant.self = np.linalg.norm(mutant) # normalize
-                del mutant.fitness.values
-
-        print("\n ----- GENERATION {0} -----".format(i))
-        
-        # Evaluate newcomers to the population
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        invalid_fit = np.array(list(map(lambda x: tbx.evaluate(x, env), invalid_ind)))
-        for ind, fit in zip(invalid_ind, invalid_fit):
+        # Evaluate the entire population
+        print("\n ----- GENERATION 0 -----")
+        fitnesses = evaluate_pop(pop, env)
+        for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = [fit]
 
-        
-        # The population is entirely replaced by the offspring
-        pop[:] = offspring
-
-        # set new population fitness
-        fitnesses = [ind.fitness.values for ind in pop]
-        
         best_fit = np.max(fitnesses)
         mean_fit = np.mean(fitnesses)
         std_fit = np.std(fitnesses)
 
-        # saves results for each generation
-        file_aux  = open(exp_path+'/results.txt','a')
-        print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
-        file_aux.write("\n" + str(i) + ' ' +  str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
+        # saves results for first population
+        file_aux  = open(exp_path_run+'/results.txt','w')
+        file_aux.write('gen best mean std')
+        print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format("0", best_fit, mean_fit, std_fit))
+        file_aux.write("\n0 " + str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
         file_aux.close()
-
 
         # save new best fitness if better than current
         if best_fit > best_fit_exp:
             best_idx = np.argmax(fitnesses) # returns index of maximum
-            np.savetxt(exp_path+'/best.txt', pop[best_idx])
-            rnds_not_improved = 0
-        else:
-            rnds_not_improved += 1
+            np.savetxt(exp_path_run+'/best.txt', pop[best_idx])
 
-        if rnds_not_improved == early_stopping:
-            print("\n ##### Fitness has not improved in {0} rounds, stopping simulation...".format(early_stopping))
-            break
+        for i in range(1, generations+1):
+            
+            # Select the next generation individuals
+            offspring = tbx.select(pop, len(pop)) 
+            # Clone the selected individuals
+            offspring = list(map(tbx.clone, offspring))
+
+            # Apply crossover and mutation on the offspring
+            for child1, child2 in zip(offspring[::2], offspring[1::2]):
+                if np.random.rand() < CXPB:
+                    tbx.mate(child1, child2)
+                    del child1.fitness.values
+                    del child2.fitness.values
+
+            for mutant in offspring:
+                if np.random.rand() < MUTPB:
+                    tbx.mutate(mutant)
+                    mutant.self = np.linalg.norm(mutant) # normalize
+                    del mutant.fitness.values
+
+            print("\n ----- GENERATION {0} -----".format(i))
+            
+            # Evaluate newcomers to the population
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            invalid_fit = np.array(list(map(lambda x: tbx.evaluate(x, env), invalid_ind)))
+            for ind, fit in zip(invalid_ind, invalid_fit):
+                ind.fitness.values = [fit]
+
+            # The population is entirely replaced by the offspring
+            pop[:] = offspring
+
+            # set new population fitness
+            fitnesses = [ind.fitness.values for ind in pop]
+            
+            best_fit = np.max(fitnesses)
+            mean_fit = np.mean(fitnesses)
+            std_fit = np.std(fitnesses)
+
+            # saves results for each generation
+            file_aux  = open(exp_path_run+'/results.txt','a')
+            print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
+            file_aux.write("\n" + str(i) + ' ' +  str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
+            file_aux.close()
+
+
+            # save new best fitness if better than current
+            if best_fit > best_fit_exp:
+                best_idx = np.argmax(fitnesses) # returns index of maximum
+                np.savetxt(exp_path_run+'/best.txt', pop[best_idx])
+                rnds_not_improved = 0
+            else:
+                rnds_not_improved += 1
+
+            if rnds_not_improved == early_stopping:
+                print("\n ##### Fitness has not improved in {0} rounds, stopping simulation...".format(early_stopping))
+                break
 
     print("\n ----- SIMULATION FOR ENEMY {0} IS COMPLETED -----".format(enemy))
