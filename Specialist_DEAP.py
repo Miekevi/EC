@@ -172,11 +172,6 @@ tbx.register("mutate", tools.mutGaussian, mu=mut_mu, sigma=mut_sigm, indpb=mut_g
 
 for enemy, env in zip(enemies, envs):
 
-    # # redefine output folder for every enemy
-    # exp_path = output_folder + experiment_name + '_en' + str(enemy)
-    # if not os.path.exists(exp_path):
-    #     os.makedirs(exp_path)
-
     for run in range(1, runs_per_enemy+1):
 
         # redefine output folder for every run
