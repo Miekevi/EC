@@ -14,27 +14,32 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "Specialist_DEAP"
+experiment_name = "Eval_test"
 output_folder = 'outputs/'
 
 # if evaluate is true we evaluate our best saved solution
-evaluate = False
+evaluate = True
 
 
 ########### initializing game variables ##########
 
 n_hidden_neurons = 10
 
-npop = 10               # population size
-generations = 5         # number of generations
-early_stopping = 25     # stop if fitness hasn't improved for x rounds   
+npop = 10              # population size
+generations = 5        # number of generations
+early_stopping = 50     # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
-CXPB = 0.5              # crossover (mating) prob
-MUTPB = 0.2             # mutation prob
+tournament_size = 10    # individuals participating in tournament
+mate_prob = 0.6         # crossover (mating) prob
+mut_prob = 0.5          # mutation prob for individual
+mut_gene_prob = 0.3     # mutation prob for each gene
+mut_mu = 0              # mutation mean
+mut_sigm = 1            # mutation sigma
 
-enemies = [1]           # can be [1,2,3]
-runs_per_enemy = 10     
+
+enemies = [1,2]           # can be [1,2,3]
+runs_per_enemy = 3     
 
 
 ########### initializing game(s) ##########
@@ -50,6 +55,7 @@ for enemy in enemies:
                         enemymode="static",
                         level=2,
                         speed="fastest",
+                        randomini="yes",
                         savelogs="no") # enabling this gives error because we log the output to 'outputs/<exp_name>'
     envs.append(env)
 
@@ -74,15 +80,70 @@ def evaluate_pop(x, env):
 ########### if evaluate is true, only evaluate and exit ##########
 
 # loads file with the best solution for testing
+eval_runs = 5
 if evaluate:
-    for enemy, env in zip(enemies, envs):   
-        try:
-            best_sol = np.loadtxt('outputs/'+experiment_name+'_'+str(enemy)+'/best.txt') # loads solution from outputs/{expname}_{enemy}/best.txt
-            print('\n --------- Running best saved solution for enemy '+str(enemy)+' ---------- \n')
-            env.update_parameter('speed','normal')
-            evaluate_ind(best_sol, env)
-        except IOError:
-            print('ERROR: Solution to be evaluated for enemy {0} cannot be found!'.format(str(enemy)))
+    
+    # run evaluation for every enemy
+    for enemy, env in zip(enemies, envs):
+        # env.update_parameter('speed','normal') # can be enabled if visualisation is True
+        
+        # make folder for overall enemy fitness
+        exp_en_eval = output_folder + experiment_name + '_en' + str(enemy)
+        if not os.path.exists(exp_en_eval):
+            os.makedirs(exp_en_eval)
+
+        bests_all_runs = []
+        means_all_runs = []
+                
+        # go to run folder for every enemy
+        for run in range(1, runs_per_enemy + 1):
+            exp_en_run = exp_en_eval + "_run" + str(run)
+
+            bests = []
+            means = []
+
+            # first load results to later calculate mean
+            with open(exp_en_run + "/results.txt", "r") as results:
+                next(results) #skip first line
+                for line in results:
+                    gen, best, mean, std, = line.split(' ')
+                    bests.append(np.float(best))
+                    means.append(np.float(mean))
+            
+            # loads best solution from that run
+            best_sol = np.loadtxt(exp_en_run + "/best.txt")
+            
+            # evaluates it 'eval_runs' times and calculate mean
+            eval_fits = []
+            for eval_run in range(1, eval_runs+1):
+                fit = evaluate_ind(best_sol, env)
+                print("\nEnemy {0}, run {1}, eval run {2}: fitness = {3}".format(enemy, run, eval_run, fit))
+                eval_fits.append(fit)
+            eval_fits_mean = np.mean(eval_fits)
+
+            # save mean evaluation of best solution in run folder
+            file_aux  = open(exp_en_run +'/eval_fit.txt','w')
+            print("\n ----- Mean fitness {0} of best solution saved for enemy {1}, run {2} -----".format(eval_fits_mean, enemy, run))
+            file_aux.write(str(eval_fits_mean))
+            file_aux.close()
+
+            bests_all_runs.append(bests)
+            means_all_runs.append(means)
+
+        # calculate mean of best and mean per generation over each run
+        mean_bests_all_runs = list(map(lambda x: sum(x)/len(x), zip(*bests_all_runs)))
+        mean_means_all_runs = list(map(lambda x: sum(x)/len(x), zip(*means_all_runs)))
+
+        # save mean of all bests per run
+        file_aux  = open(exp_en_eval +'/bests.txt','w')
+        file_aux.write(str(mean_bests_all_runs))
+        file_aux.close()
+
+        # save mean of all means per run
+        file_aux  = open(exp_en_eval +'/means.txt','w')
+        file_aux.write(str(mean_means_all_runs))
+        file_aux.close()
+
     sys.exit()
 
 
@@ -94,15 +155,16 @@ creator.create("FitnessMax", base.Fitness, weights = (1.0,))    # create maximiz
 creator.create("Individual", list, fitness=creator.FitnessMax)  # link individual class to maximization problem class
 
 tbx = base.Toolbox()
+np.random.seed(123)
 tbx.register("variable", np.random.uniform, dom_l, dom_u) # set variable instantiation function
 tbx.register("individual", tools.initRepeat, creator.Individual, tbx.variable, n=n_vars) # set individual instantiation function
 tbx.register("population", tools.initRepeat, list, tbx.individual) # set population instantiation function
 
 # evolution properties
 tbx.register("evaluate", evaluate_ind)
-tbx.register("select", tools.selTournament, tournsize=3)
+tbx.register("select", tools.selTournament, tournsize=tournament_size)
 tbx.register("mate", tools.cxTwoPoint)
-tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
+tbx.register("mutate", tools.mutGaussian, mu=mut_mu, sigma=mut_sigm, indpb=mut_gene_prob)
 
 
 ########### evolution ##########
@@ -110,15 +172,15 @@ tbx.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 
 for enemy, env in zip(enemies, envs):
 
-    # redefine output folder for every enemy
-    exp_path = output_folder + experiment_name + '_en' + str(enemy)
-    if not os.path.exists(exp_path):
-        os.makedirs(exp_path)
+    # # redefine output folder for every enemy
+    # exp_path = output_folder + experiment_name + '_en' + str(enemy)
+    # if not os.path.exists(exp_path):
+    #     os.makedirs(exp_path)
 
     for run in range(1, runs_per_enemy+1):
 
         # redefine output folder for every run
-        exp_path_run = exp_path + '_run' + str(run)
+        exp_path_run = output_folder + experiment_name + '_en' + str(enemy) + '_run' + str(run)
         if not os.path.exists(exp_path_run):
             os.makedirs(exp_path_run)
 
@@ -161,13 +223,13 @@ for enemy, env in zip(enemies, envs):
 
             # Apply crossover and mutation on the offspring
             for child1, child2 in zip(offspring[::2], offspring[1::2]):
-                if np.random.rand() < CXPB:
+                if np.random.rand() < mate_prob:
                     tbx.mate(child1, child2)
                     del child1.fitness.values
                     del child2.fitness.values
 
             for mutant in offspring:
-                if np.random.rand() < MUTPB:
+                if np.random.rand() < mut_prob:
                     tbx.mutate(mutant)
                     mutant.self = np.linalg.norm(mutant) # normalize
                     del mutant.fitness.values
