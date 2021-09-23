@@ -1,15 +1,15 @@
 import os
 import ast
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
-evalname = "Test"
+evalname = "Method1_test"
 
-expnames = ["Eval_test"]
+expnames = ["Method1"]
 colors_line = ["r"]
 colors_std = ["#ffcccb"]
 
-enemies = [1, 2]
+enemies = [2,4,6]
 runs_per_enemy = 3
 
 if not os.path.exists("plots/" + evalname):
@@ -56,7 +56,6 @@ for enemy in enemies:
     plt.clf()
 
     # make boxplot per enemy
-    print(group)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.boxplot(group)
