@@ -14,31 +14,31 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "Eval_test"
+experiment_name = "Max"
 output_folder = 'outputs/'
 
 # if evaluate is true we evaluate our best saved solution
-evaluate = True
+evaluate = False
 
 
 ########### initializing game variables ##########
 
 n_hidden_neurons = 10
 
-npop = 10              # population size
-generations = 5        # number of generations
+npop = 100              # population size
+generations = 50        # number of generations
 early_stopping = 50     # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
 tournament_size = 10    # individuals participating in tournament
 mate_prob = 0.6         # crossover (mating) prob
 mut_prob = 0.5          # mutation prob for individual
-mut_gene_prob = 0.3     # mutation prob for each gene
+mut_gene_prob = 0.4     # mutation prob for each gene
 mut_mu = 0              # mutation mean
 mut_sigm = 1            # mutation sigma
 
 
-enemies = [1,2]           # can be [1,2,3]
+enemies = [1]           # can be [1,2,3]
 runs_per_enemy = 3     
 
 
