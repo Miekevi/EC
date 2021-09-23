@@ -14,10 +14,11 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "Max"
+experiment_name = "Eval_test"
 output_folder = 'outputs/'
 
-# if evaluate is true we evaluate our best saved solution
+# if evaluate is true we evaluate the results of an already ran experiment
+# note that the data must be complete and all enemies must have the same amount of runs
 evaluate = False
 
 
@@ -30,16 +31,16 @@ generations = 50        # number of generations
 early_stopping = 50     # stop if fitness hasn't improved for x rounds   
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
-tournament_size = 10    # individuals participating in tournament
-mate_prob = 0.6         # crossover (mating) prob
-mut_prob = 0.5          # mutation prob for individual
-mut_gene_prob = 0.4     # mutation prob for each gene
+tournament_size = 2    # individuals participating in tournament
+mate_prob = 0.4         # crossover (mating) prob
+mut_prob = 0.4          # mutation prob for individual
+mut_gene_prob = 0.3     # mutation prob for each gene
 mut_mu = 0              # mutation mean
 mut_sigm = 1            # mutation sigma
 
 
-enemies = [1]           # can be [1,2,3]
-runs_per_enemy = 3     
+enemies = [2, 4, 6]           # can be [1,2,3]
+runs_per_enemy = 10     
 
 
 ########### initializing game(s) ##########
@@ -80,68 +81,78 @@ def evaluate_pop(x, env):
 ########### if evaluate is true, only evaluate and exit ##########
 
 # loads file with the best solution for testing
-eval_runs = 5
+eval_simulation_runs = 5
 if evaluate:
     
     # run evaluation for every enemy
     for enemy, env in zip(enemies, envs):
         # env.update_parameter('speed','normal') # can be enabled if visualisation is True
         
-        # make folder for overall enemy fitness
-        exp_en_eval = output_folder + experiment_name + '_en' + str(enemy)
+        # set experiemnt + enemy path for iteration
+        exp_en = output_folder + experiment_name + '_en' + str(enemy)
+        
+        # make folder for overall enemy analysis
+        exp_en_eval = exp_en + "_eval"
         if not os.path.exists(exp_en_eval):
             os.makedirs(exp_en_eval)
 
-        bests_all_runs = []
-        means_all_runs = []
-                
+        mean_bests_all_runs = []
+        bests_gen_all_runs = []
+        means_gen_all_runs = []
+                        
         # go to run folder for every enemy
         for run in range(1, runs_per_enemy + 1):
-            exp_en_run = exp_en_eval + "_run" + str(run)
+            exp_en_run = exp_en + "_run" + str(run)
 
-            bests = []
-            means = []
+            bests_gen = []
+            means_gen = []
 
             # first load results to later calculate mean
             with open(exp_en_run + "/results.txt", "r") as results:
                 next(results) #skip first line
                 for line in results:
                     gen, best, mean, std, = line.split(' ')
-                    bests.append(np.float(best))
-                    means.append(np.float(mean))
+                    bests_gen.append(np.float(best))
+                    means_gen.append(np.float(mean))
             
             # loads best solution from that run
             best_sol = np.loadtxt(exp_en_run + "/best.txt")
             
-            # evaluates it 'eval_runs' times and calculate mean
+            # evaluates it 'eval_runs' times, calculate mean and add it to the list
             eval_fits = []
-            for eval_run in range(1, eval_runs+1):
+            for eval_run in range(1, eval_simulation_runs+1):
                 fit = evaluate_ind(best_sol, env)
                 print("\nEnemy {0}, run {1}, eval run {2}: fitness = {3}".format(enemy, run, eval_run, fit))
                 eval_fits.append(fit)
             eval_fits_mean = np.mean(eval_fits)
+            mean_bests_all_runs.append(eval_fits_mean)
 
-            # save mean evaluation of best solution in run folder
-            file_aux  = open(exp_en_run +'/eval_fit.txt','w')
-            print("\n ----- Mean fitness {0} of best solution saved for enemy {1}, run {2} -----".format(eval_fits_mean, enemy, run))
-            file_aux.write(str(eval_fits_mean))
-            file_aux.close()
-
-            bests_all_runs.append(bests)
-            means_all_runs.append(means)
+            bests_gen_all_runs.append(bests_gen)
+            means_gen_all_runs.append(means_gen)
 
         # calculate mean of best and mean per generation over each run
-        mean_bests_all_runs = list(map(lambda x: sum(x)/len(x), zip(*bests_all_runs)))
-        mean_means_all_runs = list(map(lambda x: sum(x)/len(x), zip(*means_all_runs)))
+        mean_bests_gen_all_runs = list(map(lambda x: sum(x)/len(x), zip(*bests_gen_all_runs)))
+        mean_means_gen_all_runs = list(map(lambda x: sum(x)/len(x), zip(*means_gen_all_runs)))
+        std_mean_means_gen_all_runs = list(map(lambda x: np.std(x), zip(*means_gen_all_runs)))
 
         # save mean of all bests per run
-        file_aux  = open(exp_en_eval +'/bests.txt','w')
+        file_aux  = open(exp_en_eval +'/bests_run.txt','w')
         file_aux.write(str(mean_bests_all_runs))
         file_aux.close()
 
-        # save mean of all means per run
-        file_aux  = open(exp_en_eval +'/means.txt','w')
-        file_aux.write(str(mean_means_all_runs))
+        # save mean of all bests per generation, averaged over runs
+        file_aux  = open(exp_en_eval +'/bests_gen.txt','w')
+        file_aux.write(str(mean_bests_gen_all_runs))
+        file_aux.close()
+
+        # save mean of all means per generation, averaged over runs
+        file_aux  = open(exp_en_eval +'/means_gen.txt','w')
+        file_aux.write(str(mean_means_gen_all_runs))
+        file_aux.close()
+
+        # save std of all means per generation, averaged over runs
+        file_aux  = open(exp_en_eval +'/stds_gen.txt','w')
+        file_aux.write(str(std_mean_means_gen_all_runs))
         file_aux.close()
 
     sys.exit()
