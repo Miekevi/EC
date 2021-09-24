@@ -3,18 +3,25 @@ import ast
 import numpy as np
 import matplotlib.pyplot as plt
 
-evalname = "Method1_test"
+########### initializing script variables ##########
 
+# give plotting name, iplots will be saved in folder with same name
+plotting_name = "Method1_test"
+
+# give experiments that should be plotted, with corresponding color codes
 expnames = ["Method1"]
 colors_line = ["r"]
 colors_std = ["#ffcccb"]
 
-enemies = [2,4,6]
-runs_per_enemy = 3
+enemies = [1]               # experiments must have at least been done on these enemies
+runs_per_enemy = 1          # experiments must have at least this amount of runs
+generations_per_run = 100   # experiments must have at least this amount of generations
 
-if not os.path.exists("plots/" + evalname):
-        os.makedirs("plots/" + evalname)
 
+########### plotting script ##########
+
+if not os.path.exists("plots/" + plotting_name):
+        os.makedirs("plots/" + plotting_name)
 
 # make a plot for every enemy
 for enemy in enemies:
@@ -28,11 +35,11 @@ for enemy in enemies:
 
         # load bests_gen, means_gen and stds_gen
         bests_gen_str = open("outputs/" + expname + "_en" + str(enemy) + "_eval/bests_gen.txt", "r").readline()
-        bests_gen = np.array(ast.literal_eval(bests_gen_str))
+        bests_gen = np.array(ast.literal_eval(bests_gen_str))[:generations_per_run]
         means_gen_str = open("outputs/" + expname + "_en" + str(enemy) + "_eval/means_gen.txt", "r").readline()
-        means_gen = np.array(ast.literal_eval(means_gen_str))
+        means_gen = np.array(ast.literal_eval(means_gen_str))[:generations_per_run]
         stds_gen_str = open("outputs/" + expname + "_en" + str(enemy) + "_eval/stds_gen.txt", "r").readline()
-        stds_gen = np.array(ast.literal_eval(stds_gen_str))
+        stds_gen = np.array(ast.literal_eval(stds_gen_str))[:generations_per_run]
         
         plt.plot(means_gen, color=color_line, label="Mean " + str(expname))
         plt.plot(bests_gen, ':', color=color_line, label="Best " + str(expname))
@@ -52,7 +59,7 @@ for enemy in enemies:
     plt.ylabel("Fitness")
     plt.legend(loc = 'lower right')
 
-    plt.savefig("plots/" + evalname + "/generations_en" + str(enemy) + ".png")
+    plt.savefig("plots/" + plotting_name + "/generations_en" + str(enemy) + ".png")
     plt.clf()
 
     # make boxplot per enemy
@@ -63,6 +70,6 @@ for enemy in enemies:
     plt.ylabel("Fitness")
     plt.xlabel("EA name")
     ax.set_xticklabels(expnames)
-    fig.savefig("plots/" + evalname + "/boxplot_en" + str(enemy) + ".png")
+    fig.savefig("plots/" + plotting_name + "/boxplot_en" + str(enemy) + ".png")
     plt.clf()
 
