@@ -14,10 +14,11 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "Specialist_DEAP_2"
+experiment_name = "Eval2_test"
 output_folder = 'outputs/'
 
-# if evaluate is true we evaluate our best saved solution
+# if evaluate is true we evaluate the results of an already ran experiment
+# note that the data must be complete and all enemies must have the same amount of runs
 evaluate = False
 
 
@@ -184,7 +185,7 @@ for enemy, env in zip(enemies, envs):
     for run in range(1, runs_per_enemy+1):
 
         # redefine output folder for every run
-        exp_path_run = exp_path + '_run' + str(run)
+        exp_path_run = output_folder + experiment_name + '_en' + str(enemy) + '_run' + str(run)
         if not os.path.exists(exp_path_run):
             os.makedirs(exp_path_run)
 
@@ -252,7 +253,6 @@ for enemy, env in zip(enemies, envs):
             print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
             file_aux.write("\n" + str(i) + ' ' +  str(round(best_fit,6)) + ' ' +  str(round(mean_fit,6)) + ' ' + str(round(std_fit,6)))
             file_aux.close()
-
 
             # save new best fitness if better than current
             if best_fit > best_fit_exp:
