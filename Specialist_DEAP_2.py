@@ -36,7 +36,7 @@ CXPB = 0.5              # crossover (mating) prob
 MUTPB = 0.2             # mutation prob
 
 enemies = [1]           # can be [1,2,3]
-runs_per_enemy = 2
+runs_per_enemy = 10
 
 
 ########### initializing game(s) ##########
