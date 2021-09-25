@@ -228,7 +228,7 @@ for enemy, env in zip(enemies, envs):
             offspring = list(map(tbx.clone, offspring))
 
             # Apply crossover and mutation on the offspring
-            offspring = algorithms.varAnd(offspring, tbx, CXPB, MUTPB) # is this the same as what Max has done?
+            offspring = algorithms.varAnd(offspring, tbx, mate_prob, mut_prob) # is this the same as what Max has done?
 
             print("\n ----- GENERATION {0} -----".format(i))
 
