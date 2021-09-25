@@ -36,7 +36,7 @@ CXPB = 0.5              # crossover (mating) prob
 MUTPB = 0.2             # mutation prob
 
 enemies = [1]           # can be [1,2,3]
-runs_per_enemy = 10
+runs_per_enemy = 2
 
 
 ########### initializing game(s) ##########
@@ -102,8 +102,9 @@ tbx.register("population", tools.initRepeat, list, tbx.individual) # set populat
 
 # evolution properties
 tbx.register("evaluate", evaluate_ind)
-tbx.register("select", tools.selNSGA2) # different selection operator
-tbx.register("mate", tools.cxUniform, indpb=0.2) # different crossover (the one mentioned in paper)
+tbx.register("select1", tools.selRoulette) # different selection operator
+tbx.register("select", tools.selTournament, tournsize=3) # different selection operator
+tbx.register("mate", tools.cxTwoPoint) # different crossover (the one mentioned in paper)
 tbx.register("mutate", tools.mutShuffleIndexes, indpb=0.2) # different mutation operator, instead of gaussian
 
 
@@ -156,7 +157,8 @@ for enemy, env in zip(enemies, envs):
         for i in range(1, generations+1):
 
             # Select the next generation individuals
-            offspring = tbx.select(pop, len(pop))
+            offspring1 = tbx.select1(pop, len(pop))
+            offspring = tbx.select(offspring1, len(pop))
             # Clone the selected individuals
             offspring = list(map(tbx.clone, offspring))
 
