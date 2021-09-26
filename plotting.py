@@ -11,7 +11,7 @@ plotting_name = "Method1_test"
 # give experiments that should be plotted, with corresponding color codes
 expnames = ["Method1"]
 colors_line = ["r"]
-colors_std = ["#ffcccb"]
+colors_std = ["b"]
 
 enemies = [1]               # experiments must have at least been done on these enemies
 runs_per_enemy = 1          # experiments must have at least this amount of runs
@@ -46,7 +46,7 @@ for enemy in enemies:
         plt.legend()
         lower = means_gen-stds_gen
         upper = means_gen+stds_gen
-        plt.fill_between(np.array(range(0, len(means_gen))), lower, upper, color=color_std)
+        plt.fill_between(np.array(range(0, len(means_gen))), lower, upper, color=color_std, alpha=0.4)
 
         # load average for all runs for enemy in experiment
         bests_run_str = open("outputs/" + expname + "_en" + str(enemy) + "_eval/bests_run.txt", "r").readline()
