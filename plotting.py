@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 ########### initializing script variables ##########
 
 # give plotting name, iplots will be saved in folder with same name
-plotting_name = "Method1_test"
+plotting_name = "Plotting_name"
 
 # give experiments that should be plotted, with corresponding color codes
-expnames = ["Method1"]
-colors_line = ["r"]
-colors_std = ["b"]
+expnames = ["Exp_name1", "Exp_name2"]
+colors_line = ["r", "b"]
+colors_std = ["#ffcccb", "#add8e6"]
 
-enemies = [1]               # experiments must have at least been done on these enemies
-runs_per_enemy = 1          # experiments must have at least this amount of runs
-generations_per_run = 100   # experiments must have at least this amount of generations
+enemies = [2, 4, 6]         # experiments must have at least been done on these enemies
+runs_per_enemy = 10         # experiments must have at least this amount of runs
+generations_per_run = 50    # experiments must have at least this amount of generations
 
 
 ########### plotting script ##########
@@ -54,7 +54,7 @@ for enemy in enemies:
         group.append(bests_run)
 
     # make lineplot per enemy    
-    plt.title("Results over all generations for experiments " + str(expnames))
+    plt.title("Results over all generations for experiments " + str(expnames) + " (Enemy = " + str(enemy) + ")")
     plt.xlabel("Generations")
     plt.ylabel("Fitness")
     plt.legend(loc = 'lower right')
