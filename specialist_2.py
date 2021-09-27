@@ -14,12 +14,12 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "Eval2_test"
+experiment_name = "specialist_2"
 output_folder = 'outputs/'
 
 # if evaluate is true we evaluate the results of an already ran experiment
 # note that the data must be complete and all enemies must have the same amount of runs
-evaluate = True
+evaluate = False
 
 
 ########### initializing game variables ##########
@@ -30,16 +30,15 @@ n_hidden_neurons = 10
 
 npop = 100               # population size
 generations = 50         # number of generations
-early_stopping = 50     # stop if fitness hasn't improved for x rounds
+early_stopping = 100     # stop if fitness hasn't improved for x rounds
 dom_u = 1               # upper bound weight
 dom_l = -1              # lower bound weight
-tournament_size = 2    # individuals participating in tournament
-mate_prob = 0.4         # crossover (mating) prob
-mut_prob = 0.4          # mutation prob for individual
-mut_gene_prob = 0.3     # mutation prob for each gene
+tournament_size = 8    # individuals participating in tournament
+mate_prob = 0.5         # crossover (mating) prob, based on example DEAP
+mut_prob = 0.2          # mutation prob for individual, based on example DEAP
 
 
-enemies = [2, 4, 6]          # can be [1,2,3]
+enemies = [4, 6, 8]          # can be [1,2,3]
 runs_per_enemy = 10
 
 
@@ -50,13 +49,16 @@ runs_per_enemy = 10
 envs = []
 for enemy in enemies:
     env = Environment(experiment_name=experiment_name,
-                        enemies=[enemy],
-                        playermode="ai",
-                        player_controller=player_controller(n_hidden_neurons),
-                        enemymode="static",
-                        level=2,
-                        speed="fastest",
-                        savelogs="no") # enabling this gives error because we log the output to 'outputs/<exp_name>'
+                      enemies=[enemy],
+                      playermode="ai",
+                      player_controller=player_controller(n_hidden_neurons),
+                      enemymode="static",
+                      level=2,
+                      speed="fastest",
+                      randomini="yes",
+                      timeexpire=1500,
+                      visualmode="no",
+                      savelogs="no")# enabling this gives error because we log the output to 'outputs/<exp_name>'
     envs.append(env)
 
 env = envs[0]

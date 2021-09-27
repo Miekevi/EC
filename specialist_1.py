@@ -90,7 +90,7 @@ if evaluate:
     for enemy, env in zip(enemies, envs):
         # env.update_parameter('speed','normal') # can be enabled if visualisation is True
         
-        # set experiemnt + enemy path for iteration
+        # set experiment + enemy path for iteration
         exp_en = output_folder + experiment_name + '_en' + str(enemy)
         
         # make folder for overall enemy analysis
