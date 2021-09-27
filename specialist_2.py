@@ -19,7 +19,7 @@ output_folder = 'outputs/'
 
 # if evaluate is true we evaluate the results of an already ran experiment
 # note that the data must be complete and all enemies must have the same amount of runs
-evaluate = False
+evaluate = True
 
 
 ########### initializing game variables ##########
