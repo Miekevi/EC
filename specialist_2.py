@@ -14,7 +14,7 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "specialist_2"
+experiment_name = "spec_2"
 output_folder = 'outputs/'
 
 # if evaluate is true we evaluate the results of an already ran experiment
