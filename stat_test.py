@@ -1,7 +1,7 @@
 import ast
 import numpy as np
 
-from scipy.stats import mannwhitneyu
+from scipy.stats import wilcoxon
 
 
 ########### initializing script variables ##########
@@ -26,6 +26,6 @@ for enemy in enemies:
             means_gen_1 = means_gen
         else:
             means_gen_2 = means_gen
-    statistics = mannwhitneyu(means_gen_1,means_gen_2)
+    statistics = wilcoxon(means_gen_1,means_gen_2)
     print(statistics)
 
