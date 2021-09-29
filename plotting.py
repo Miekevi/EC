@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 ########### initializing script variables ##########
 
 # give plotting name, iplots will be saved in folder with same name
-plotting_name = "Plotting_name"
+plotting_name = "task_1"
 
 # give experiments that should be plotted, with corresponding color codes
-expnames = ["Exp_name1", "Exp_name2"]
+expnames = ["spec_1", "specialist_2"]
 colors_line = ["r", "b"]
 colors_std = ["#ffcccb", "#add8e6"]
 
-enemies = [2, 4, 6]         # experiments must have at least been done on these enemies
+enemies = [4, 6, 8]         # experiments must have at least been done on these enemies
 runs_per_enemy = 10         # experiments must have at least this amount of runs
 generations_per_run = 50    # experiments must have at least this amount of generations
 
@@ -54,9 +54,11 @@ for enemy in enemies:
         group.append(bests_run)
 
     # make lineplot per enemy    
-    plt.title("Results over all generations for experiments " + str(expnames) + " (Enemy = " + str(enemy) + ")")
+    plt.title("Fitness over all generations (Enemy = " + str(enemy) + ")")
     plt.xlabel("Generations")
     plt.ylabel("Fitness")
+    x1,x2,y1,y2 = plt.axis()  
+    plt.axis((x1,x2,0,100))
     plt.legend(loc = 'lower right')
 
     plt.savefig("plots/" + plotting_name + "/generations_en" + str(enemy) + ".png")
@@ -70,6 +72,8 @@ for enemy in enemies:
     plt.ylabel("Fitness")
     plt.xlabel("EA name")
     ax.set_xticklabels(expnames)
+    x1,x2,y1,y2 = plt.axis()  
+    plt.axis((x1,x2,0,100))
     fig.savefig("plots/" + plotting_name + "/boxplot_en" + str(enemy) + ".png")
     plt.clf()
 
