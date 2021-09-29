@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 plotting_name = "task_1"
 
 # give experiments that should be plotted, with corresponding color codes
-expnames = ["spec_1", "specialist_2"]
+expnames = ["spec_1", "spec_2"]
 colors_line = ["r", "b"]
 colors_std = ["#ffcccb", "#add8e6"]
 
-enemies = [4, 6, 8]         # experiments must have at least been done on these enemies
+enemies = [3, 7, 8]         # experiments must have at least been done on these enemies
 runs_per_enemy = 10         # experiments must have at least this amount of runs
 generations_per_run = 50    # experiments must have at least this amount of generations
 
