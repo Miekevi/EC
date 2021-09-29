@@ -6,7 +6,7 @@ from scipy.stats import wilcoxon
 
 ########### initializing script variables ##########
 
-expnames = ["spec_1", "spec_2"] # after correction put it to spec_2
+expnames = ["spec_1", "spec_2"]
 
 enemies = [3, 7, 8]         # experiments must have at least been done on these enemies
 runs_per_enemy = 10         # experiments must have at least this amount of runs
@@ -15,8 +15,9 @@ generations_per_run = 50    # experiments must have at least this amount of gene
 means_gen_1 = []
 means_gen_2 = []
 
-# prints the mann whitney u test results per enemy to see if the means are significantly different
+# prints the Wilcoxon results per enemy to see if the means are significantly different
 # can be rewritten to give the test statistic over combined enemies
+
 for enemy in enemies:
 
     for expname in expnames:

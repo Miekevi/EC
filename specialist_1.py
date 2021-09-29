@@ -8,6 +8,8 @@ from deap import base, creator, tools
 
 ########### initializing file variables ##########
 
+np.random.seed(1) # set a seed so that the results are consistent for reviewers of code/results
+
 # disable visuals for faster experiments
 visuals = False
 if not visuals:
@@ -39,7 +41,7 @@ mut_mu = 0              # mutation mean
 mut_sigm = 1            # mutation sigma
 
 
-enemies = [4, 6, 8]     # can be [1, 2, 3]
+enemies = [3, 7, 8]
 runs_per_enemy = 10     
 
 
@@ -58,7 +60,6 @@ for enemy in enemies:
                         speed="fastest",
                         randomini="yes",
                         timeexpire=1500,
-                        visualmode="no",
                         savelogs="no") # enabling this gives an error because we log the output to 'outputs/<exp_name>'
     envs.append(env)
 

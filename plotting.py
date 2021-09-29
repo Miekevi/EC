@@ -70,7 +70,7 @@ for enemy in enemies:
     ax.boxplot(group)
     plt.title("Mean fitness per EA over " + str(runs_per_enemy) + " runs (Enemy = " + str(enemy) + ")")
     plt.ylabel("Fitness")
-    plt.xlabel("EA name")
+    plt.xlabel("EA type")
     ax.set_xticklabels(expnames)
     x1,x2,y1,y2 = plt.axis()  
     plt.axis((x1,x2,0,100))
