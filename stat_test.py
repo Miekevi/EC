@@ -28,5 +28,5 @@ for enemy in enemies:
         else:
             means_gen_2 = means_gen
     statistics = wilcoxon(means_gen_1,means_gen_2)
-    print(statistics)
+    print(enemy,statistics)
 
