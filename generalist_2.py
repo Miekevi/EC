@@ -9,19 +9,19 @@ from deap import base, creator, tools, algorithms
 
 ########### initializing file variables ##########
 
-np.random.seed(1)  # set a seed so that the results are consistent for reviewers of code/results
+#np.random.seed(1)  # set a seed so that the results are consistent for reviewers of code/results
 
-# disable visuals for faster experiments
+# Disable visuals for faster experiments
 visuals = False
 if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-# setting experiment name and creating folder for logs
+# Setting experiment name and creating folder for logs
 experiment_name = "gen_2"
 output_folder = 'outputs/'
 
-# if evaluate is true we evaluate the results of an already ran experiment
-# note that the data must be complete and all enemies must have the same amount of runs
+# If evaluate is true we evaluate the results of an already ran experiment
+# Note that the data must be complete and all groups must have the same amount of runs
 evaluate = False
 
 ########### initializing game variables ##########
@@ -45,7 +45,7 @@ runs_per_enemy = 2
 
 ########### initializing game(s) ##########
 
-# initialize simulations in individual evolution mode, for every enemy.
+# Initialize simulations in individual evolution mode, for every enemy.
 envs = []
 
 env_1 = Environment(experiment_name=experiment_name,
@@ -90,25 +90,25 @@ def evaluate_ind(x, env):
     return np.array(simulation(x, env))
 
 
-def evaluate_pop(x, env):   # needs to get the average of all enemies, not doing it right now
+def evaluate_pop(x, env):
     x = np.array(x)
     return np.array(list(map(lambda y: simulation(y, env), x)))
 
 
 ########### if evaluate is true, only evaluate and exit ##########
 
-# loads file with the best solution for testing
+# Loads file with the best solution for testing
 eval_simulation_runs = 5
 if evaluate:
 
-    # run evaluation for every enemy
+    # Run evaluation for every enemy
     for group, env in enumerate(envs):
         # env.update_parameter('speed','normal') # can be enabled if visualisation is True
 
-        # set experiment + enemy path for iteration
+        # Set experiment + enemy path for iteration
         exp_en = output_folder + experiment_name + '_en' + str(group+1)
 
-        # make folder for overall enemy analysis
+        # Make folder for overall enemy analysis
         exp_en_eval = exp_en + "_eval"
         if not os.path.exists(exp_en_eval):
             os.makedirs(exp_en_eval)
@@ -117,14 +117,14 @@ if evaluate:
         bests_gen_all_runs = []
         means_gen_all_runs = []
 
-        # go to run folder for every enemy
+        # Go to run folder for every enemy
         for run in range(1, runs_per_enemy + 1):
             exp_en_run = exp_en + "_run" + str(run)
 
             bests_gen = []
             means_gen = []
 
-            # first load results to later calculate mean
+            # First load results to later calculate mean
             with open(exp_en_run + "/results.txt", "r") as results:
                 next(results)  # skip first line
                 for line in results:
@@ -132,10 +132,10 @@ if evaluate:
                     bests_gen.append(np.float(best))
                     means_gen.append(np.float(mean))
 
-            # loads best solution from that run
+            # Loads best solution from that run
             best_sol = np.loadtxt(exp_en_run + "/best.txt")
 
-            # evaluates it 'eval_runs' times, calculate mean and add it to the list
+            # Evaluates it 'eval_runs' times, calculate mean and add it to the list
             eval_fits = []
             for eval_run in range(1, eval_simulation_runs + 1):
                 fit = evaluate_ind(best_sol, env)
@@ -147,27 +147,27 @@ if evaluate:
             bests_gen_all_runs.append(bests_gen)
             means_gen_all_runs.append(means_gen)
 
-        # calculate mean of best and mean per generation over each run
+        # Calculate mean of best and mean per generation over each run
         mean_bests_gen_all_runs = list(map(lambda x: sum(x) / len(x), zip(*bests_gen_all_runs)))
         mean_means_gen_all_runs = list(map(lambda x: sum(x) / len(x), zip(*means_gen_all_runs)))
         std_mean_means_gen_all_runs = list(map(lambda x: np.std(x), zip(*means_gen_all_runs)))
 
-        # save mean of all bests per run
+        # Save mean of all bests per run
         file_aux = open(exp_en_eval + '/bests_run.txt', 'w')
         file_aux.write(str(mean_bests_all_runs))
         file_aux.close()
 
-        # save mean of all bests per generation, averaged over runs
+        # Save mean of all bests per generation, averaged over runs
         file_aux = open(exp_en_eval + '/bests_gen.txt', 'w')
         file_aux.write(str(mean_bests_gen_all_runs))
         file_aux.close()
 
-        # save mean of all means per generation, averaged over runs
+        # Save mean of all means per generation, averaged over runs
         file_aux = open(exp_en_eval + '/means_gen.txt', 'w')
         file_aux.write(str(mean_means_gen_all_runs))
         file_aux.close()
 
-        # save std of all means per generation, averaged over runs
+        # Save std of all means per generation, averaged over runs
         file_aux = open(exp_en_eval + '/stds_gen.txt', 'w')
         file_aux.write(str(std_mean_means_gen_all_runs))
         file_aux.close()
@@ -195,7 +195,7 @@ tbx.register("mate", tools.cxTwoPoint)
 tbx.register("mutate", tools.mutShuffleIndexes, indpb=mut_gene_prob)
 
 ########### evolution ##########
-# based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
+# Based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
 
 for group, env in enumerate(envs):
 
@@ -212,7 +212,7 @@ for group, env in enumerate(envs):
         print("\n ----- SIMULATING FOR GROUP {0}, run {1} -----".format(group+1, run))
         print("Writing outputs to " + exp_path_run)
 
-        # instantiate population
+        # Instantiate population
         pop = tbx.population(n=npop)
         best_fit_exp = 0
         rnds_not_improved = 0
@@ -234,7 +234,7 @@ for group, env in enumerate(envs):
         file_aux.write("\n0 " + str(round(best_fit, 6)) + ' ' + str(round(mean_fit, 6)) + ' ' + str(round(std_fit, 6)))
         file_aux.close()
 
-        # save new best fitness if better than current
+        # Save new best fitness if better than current
         if best_fit > best_fit_exp:
             best_idx = np.argmax(fitnesses)  # returns index of maximum
             np.savetxt(exp_path_run + '/best.txt', pop[best_idx])
@@ -275,21 +275,21 @@ for group, env in enumerate(envs):
             # The population is entirely replaced by the offspring
             pop[:] = offspring
 
-            # set new population fitness
+            # Set new population fitness
             fitnesses = [ind.fitness.values for ind in pop]
 
             best_fit = np.max(fitnesses)
             mean_fit = np.mean(fitnesses)
             std_fit = np.std(fitnesses)
 
-            # saves results for each generation
+            # Saves results for each generation
             file_aux = open(exp_path_run + '/results.txt', 'a')
             print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
             file_aux.write("\n" + str(i) + ' ' + str(round(best_fit, 6)) + ' ' + str(round(mean_fit, 6)) + ' ' + str(
                 round(std_fit, 6)))
             file_aux.close()
 
-            # save new best fitness if better than current
+            # Save new best fitness if better than current
             if best_fit > best_fit_exp:
                 best_idx = np.argmax(fitnesses)  # returns index of maximum
                 np.savetxt(exp_path_run + '/best.txt', pop[best_idx])
