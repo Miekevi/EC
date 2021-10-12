@@ -34,11 +34,12 @@ generations = 3  # number of generations
 early_stopping = 100  # stop if fitness hasn't improved for x rounds
 dom_u = 1  # upper bound weight
 dom_l = -1  # lower bound weight
-tournament_size = 8  # individuals participating in tournament
-mate_prob = 0.9  # crossover (mating) prob
-mut_prob = 0.03  # mutation prob
+tournament_size = 8     # individuals participating in tournament
+# mate_prob = 0.5       # dynamic;
+# mut_prob = 0.2        # dynamic;
+mut_gene_prob = 0.2     # mutation prob for each gene
 
-enemies_1 = [1, 2,5]  # random
+enemies_1 = [1, 2, 5]  # random
 enemies_2 = [3, 4]  # random
 runs_per_enemy = 2
 
@@ -80,6 +81,7 @@ env = envs[0]
 
 def simulation(x, env):
     fitness, player_life, enemy_life, time = env.play(pcont=x)
+    print(fitness)
     return fitness
 
 
@@ -185,12 +187,12 @@ tbx.register("individual", tools.initRepeat, creator.Individual, tbx.variable,
              n=n_vars)  # set individual instantiation function
 tbx.register("population", tools.initRepeat, list, tbx.individual)  # set population instantiation function
 
-# evolution properties same as specialist_2
+# Evolution properties same as specialist_2
 tbx.register("evaluate", evaluate_ind)
 tbx.register("select1", tools.selRoulette)
 tbx.register("select", tools.selTournament, tournsize=tournament_size)
 tbx.register("mate", tools.cxTwoPoint)
-tbx.register("mutate", tools.mutShuffleIndexes, indpb=mut_prob)
+tbx.register("mutate", tools.mutShuffleIndexes, indpb=mut_gene_prob)
 
 ########### evolution ##########
 # based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
@@ -199,7 +201,10 @@ for group, env in enumerate(envs):
 
     for run in range(1, runs_per_enemy + 1):
 
-        # redefine output folder for every run
+        mate_prob = 0.0
+        mut_prob = 1.0
+
+        # Redefine output folder for every run
         exp_path_run = output_folder + experiment_name + '_gr' + str(group+1) + '_run' + str(run)
         if not os.path.exists(exp_path_run):
             os.makedirs(exp_path_run)
@@ -214,7 +219,7 @@ for group, env in enumerate(envs):
 
         # Evaluate the entire population
         print("\n ----- GENERATION 0 -----")
-        fitnesses = evaluate_pop(pop, env)  # something goes wrong here as it goes per enemy...
+        fitnesses = evaluate_pop(pop, env)  # As calculated by cons_multi
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = [fit]
 
@@ -222,7 +227,7 @@ for group, env in enumerate(envs):
         mean_fit = np.mean(fitnesses)
         std_fit = np.std(fitnesses)
 
-        # saves results for first population
+        # Saves results for first population
         file_aux = open(exp_path_run + '/results.txt', 'w')
         file_aux.write('gen best mean std')
         print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format("0", best_fit, mean_fit, std_fit))
@@ -236,14 +241,28 @@ for group, env in enumerate(envs):
 
         for i in range(1, generations + 1):
 
-            # Select the next generation individuals
+            mate_prob += 1/generations
+            mut_prob -= 1/generations
+
+            # Select the next generation individuals using 2 types of selection operators
             offspring1 = tbx.select1(pop, len(pop))
             offspring = tbx.select(offspring1, len(pop))
             # Clone the selected individuals
             offspring = list(map(tbx.clone, offspring))
 
             # Apply crossover and mutation on the offspring
-            offspring = algorithms.varAnd(offspring, tbx, mate_prob, mut_prob)
+            # Dynamic as in specialist_1
+            for child1, child2 in zip(offspring[::2], offspring[1::2]):
+                if np.random.rand() < mate_prob:
+                    tbx.mate(child1, child2)
+                    del child1.fitness.values
+                    del child2.fitness.values
+
+            for mutant in offspring:
+                if np.random.rand() < mut_prob:
+                    tbx.mutate(mutant)
+                    mutant.self = np.linalg.norm(mutant) # normalize
+                    del mutant.fitness.values
 
             print("\n ----- GENERATION {0} -----".format(i))
 
