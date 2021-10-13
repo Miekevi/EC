@@ -30,7 +30,7 @@ evaluate = False
 n_hidden_neurons = 10
 
 npop = 100  # population size
-generations = 3  # number of generations
+generations = 50  # number of generations
 early_stopping = 100  # stop if fitness hasn't improved for x rounds
 dom_u = 1  # upper bound weight
 dom_l = -1  # lower bound weight
@@ -39,9 +39,9 @@ tournament_size = 8     # individuals participating in tournament
 # mut_prob = 0.2        # dynamic;
 mut_gene_prob = 0.2     # mutation prob for each gene
 
-enemies_1 = [1, 2, 5]  # random
-enemies_2 = [3, 4]  # random
-runs_per_enemy = 2
+enemies_1 = [2, 5, 6]  # random
+enemies_2 = [7, 8]  # random
+runs_per_enemy = 10
 
 ########### initializing game(s) ##########
 
@@ -49,6 +49,7 @@ runs_per_enemy = 2
 envs = []
 
 env_1 = Environment(experiment_name=experiment_name,
+                    visualmode="yes",
                     enemies=enemies_1,
                     multiplemode="yes",
                     playermode="ai",
@@ -81,7 +82,7 @@ env = envs[0]
 
 def simulation(x, env):
     fitness, player_life, enemy_life, time = env.play(pcont=x)
-    print(fitness)
+    #print(fitness)
     return fitness
 
 
@@ -284,7 +285,7 @@ for group, env in enumerate(envs):
 
             # Saves results for each generation
             file_aux = open(exp_path_run + '/results.txt', 'a')
-            print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
+            #print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
             file_aux.write("\n" + str(i) + ' ' + str(round(best_fit, 6)) + ' ' + str(round(mean_fit, 6)) + ' ' + str(
                 round(std_fit, 6)))
             file_aux.close()
