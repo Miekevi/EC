@@ -1,0 +1,17 @@
+npop = 100  # population size
+generations = 100  # number of generations
+early_stopping = 100  # stop if fitness hasn't improved for x rounds
+dom_u = 1  # upper bound weight
+dom_l = -1  # lower bound weight
+tournament_size = 6    # individuals participating in tournament
+# mate_prob = 0.5       # dynamic;
+# mut_prob = 0.2        # dynamic;
+mut_gene_prob = 0.3     # mutation prob for each gene
+
+enemies_1 = [1, 2, 5]  # random
+enemies_2 = [3, 4]  # random
+runs_per_enemy = 1
+
+cxuniform with 0.5 prob!!
+matprob from .85 to .15
+mateprob from .15 to .85
