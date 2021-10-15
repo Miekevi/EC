@@ -49,7 +49,7 @@ runs_per_enemy = 10
 envs = []
 
 env_1 = Environment(experiment_name=experiment_name,
-                    visualmode="yes",
+                    #visualmode="yes",
                     enemies=enemies_1,
                     multiplemode="yes",
                     playermode="ai",
@@ -63,6 +63,7 @@ env_1 = Environment(experiment_name=experiment_name,
 envs.append(env_1)
 
 env_2 = Environment(experiment_name=experiment_name,
+                    #visualmode="yes",
                     enemies=enemies_2,
                     multiplemode="yes",
                     playermode="ai",
@@ -140,7 +141,7 @@ if evaluate:
             eval_fits = []
             for eval_run in range(1, eval_simulation_runs + 1):
                 fit = evaluate_ind(best_sol, env)
-                print("\nEnemy {0}, run {1}, eval run {2}: fitness = {3}".format(group+1, run, eval_run, fit))
+                print("\nGroup {0}, run {1}, eval run {2}: fitness = {3}".format(group+1, run, eval_run, fit))
                 eval_fits.append(fit)
             eval_fits_mean = np.mean(eval_fits)
             mean_bests_all_runs.append(eval_fits_mean)
@@ -285,7 +286,7 @@ for group, env in enumerate(envs):
 
             # Saves results for each generation
             file_aux = open(exp_path_run + '/results.txt', 'a')
-            #print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
+            print("\nGeneration: {0}, Best: {1}, Mean: {2}, std: {3}".format(i, best_fit, mean_fit, std_fit))
             file_aux.write("\n" + str(i) + ' ' + str(round(best_fit, 6)) + ' ' + str(round(mean_fit, 6)) + ' ' + str(
                 round(std_fit, 6)))
             file_aux.close()

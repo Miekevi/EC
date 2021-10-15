@@ -32,7 +32,6 @@ class Environment(object):
                  playermode="ai",             # ai or human
                  enemymode="static",          # ai or static
                  speed="fastest",             # normal or fastest
-                 visualmode="yes",
                  inputscoded="no",            # yes or no
                  randomini="no",              # yes or no
                  sound="off",                  # on or off
@@ -61,7 +60,6 @@ class Environment(object):
         self.playermode = playermode
         self.enemymode = enemymode
         self.speed = speed
-        self.visualmode = visualmode
         self.inputscoded = inputscoded
         self.randomini = randomini
         self.sound = sound
@@ -75,8 +73,6 @@ class Environment(object):
         self.solutions = solutions
         self.joy = 0
         self.use_joystick = use_joystick
-        if self.visualmode == "no":
-            os.environ["SDL_VIDEOODRIVER"] = "dummy"
 
 
         # initializes default random controllers
@@ -476,11 +472,9 @@ class Environment(object):
                     return
 
             # updates objects and draws its itens on screen
-            if self.visualmode == "yes":
-                self.screen.fill((250,250,250))
+            self.screen.fill((250,250,250))
             self.tilemap.update( 33 / 1000., self)
-            if self.visualmode == "yes":
-                self.tilemap.draw(self.screen)
+            self.tilemap.draw(self.screen)
 
             # player life bar
             vbar = int(100 *( 1-(self.player.life/float(self.player.max_life)) ))
