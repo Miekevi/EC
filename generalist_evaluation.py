@@ -97,7 +97,7 @@ for group in range(number_of_groups):
             # for every evaluation run
             for eval_run in range(1, eval_simulation_runs + 1):
                 fit = evaluate_ind(best_sol, env)
-                print("\nEnemy {0}, run {1}, eval run {2}: fitness = {3}".format(enemy_index+1, run, eval_run, fit))
+                # print("\nEnemy {0}, run {1}, eval run {2}: fitness = {3}".format(enemy_index+1, run, eval_run, fit))
                 eval_fits.append(fit)
             # mean fitness for a specific enemy
             eval_fits_mean = np.mean(eval_fits)
