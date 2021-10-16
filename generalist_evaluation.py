@@ -15,7 +15,7 @@ if not visuals:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # setting experiment name and creating folder for logs
-experiment_name = "gen_4"
+experiment_name = "gen_1"
 output_folder = 'outputs/'
 
 # loads file with the best solution for testing
