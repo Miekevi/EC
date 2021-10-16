@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 ########### initializing script variables ##########
 
 # give plotting name, iplots will be saved in folder with same name
-plotting_name = "task2_test"
+plotting_name = "task_2"
 
 # give experiments that should be plotted, with corresponding color codes
-expnames = ["gen_4", "gen_4"]
+expnames = ["gen_1", "gen_2"]
 colors_line = ["r", "b"]
 colors_std = ["#ffcccb", "#add8e6"]
 
