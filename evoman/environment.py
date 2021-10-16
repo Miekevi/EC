@@ -12,6 +12,7 @@ import pygame
 from pygame.locals import *
 import struct
 import tmx
+import os
 
 from player import *
 from controller import Controller
@@ -39,6 +40,7 @@ class Environment(object):
                  logs="on",                   # on or off
                  savelogs="yes",              # yes or no
                  clockprec="low",
+                 visualmode="no",
                  timeexpire=3000,             # integer
                  overturetime=100,            # integer
                  solutions=None,              # any
@@ -73,6 +75,10 @@ class Environment(object):
         self.solutions = solutions
         self.joy = 0
         self.use_joystick = use_joystick
+        self.visualmode = visualmode
+
+        if self.visualmode == "no":
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 
         # initializes default random controllers
@@ -472,23 +478,27 @@ class Environment(object):
                     return
 
             # updates objects and draws its itens on screen
-            self.screen.fill((250,250,250))
+            if self.visualmode == "yes":
+                self.screen.fill((250,250,250))
             self.tilemap.update( 33 / 1000., self)
-            self.tilemap.draw(self.screen)
+            if self.visualmode == "yes":
+                self.tilemap.draw(self.screen)
 
             # player life bar
             vbar = int(100 *( 1-(self.player.life/float(self.player.max_life)) ))
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 40],[140, 40], 2)
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 45],[140, 45], 5)
-            pygame.draw.line(self.screen, (150,24,25),   [40, 45],[140 - vbar, 45], 5)
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 49],[140, 49], 2)
+            if self.visualmode == "yes":
+                pygame.draw.line(self.screen, (0,   0,   0), [40, 40],[140, 40], 2)
+                pygame.draw.line(self.screen, (0,   0,   0), [40, 45],[140, 45], 5)
+                pygame.draw.line(self.screen, (150,24,25),   [40, 45],[140 - vbar, 45], 5)
+                pygame.draw.line(self.screen, (0,   0,   0), [40, 49],[140, 49], 2)
 
             # enemy life bar
             vbar = int(100 *( 1-(self.enemy.life/float(self.enemy.max_life)) ))
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 40],[695, 40], 2)
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 45],[695, 45], 5)
-            pygame.draw.line(self.screen, (194,118,55),  [590, 45],[695 - vbar, 45], 5)
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 49],[695, 49], 2)
+            if self.visualmode == "yes":
+                pygame.draw.line(self.screen, (0,   0,   0), [590, 40],[695, 40], 2)
+                pygame.draw.line(self.screen, (0,   0,   0), [590, 45],[695, 45], 5)
+                pygame.draw.line(self.screen, (194,118,55),  [590, 45],[695 - vbar, 45], 5)
+                pygame.draw.line(self.screen, (0,   0,   0), [590, 49],[695, 49], 2)
 
 
             #gets fitness for training agents

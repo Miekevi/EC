@@ -34,10 +34,10 @@ generations = 50  # number of generations
 early_stopping = 100  # stop if fitness hasn't improved for x rounds
 dom_u = 1  # upper bound weight
 dom_l = -1  # lower bound weight
-tournament_size = 8     # individuals participating in tournament
+tournament_size = 8    # individuals participating in tournament
 # mate_prob = 0.5       # dynamic;
 # mut_prob = 0.2        # dynamic;
-mut_gene_prob = 0.2     # mutation prob for each gene
+mut_gene_prob = 0.4     # mutation prob for each gene
 
 enemies_1 = [2, 5, 6]  # random
 enemies_2 = [7, 8]  # random
@@ -83,7 +83,6 @@ env = envs[0]
 
 def simulation(x, env):
     fitness, player_life, enemy_life, time = env.play(pcont=x)
-    #print(fitness)
     return fitness
 
 
@@ -96,10 +95,7 @@ def evaluate_pop(x, env):
     x = np.array(x)
     return np.array(list(map(lambda y: simulation(y, env), x)))
 
-
 ########### initialing DEAP tools ##########
-
-n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))  # create maximization problem class
 creator.create("Individual", list, fitness=creator.FitnessMax)  # link individual class to maximization problem class
@@ -114,18 +110,22 @@ tbx.register("population", tools.initRepeat, list, tbx.individual)  # set popula
 tbx.register("evaluate", evaluate_ind)
 tbx.register("select1", tools.selRoulette)
 tbx.register("select", tools.selTournament, tournsize=tournament_size)
-tbx.register("mate", tools.cxTwoPoint)
+tbx.register("mate", tools.cxUniform, indpb=0.5)
 tbx.register("mutate", tools.mutShuffleIndexes, indpb=mut_gene_prob)
 
 ########### evolution ##########
 # Based on the DEAP documentation overview page: https://deap.readthedocs.io/en/master/overview.html
 
-for group, env in enumerate(envs):
+# for group, env in enumerate(envs):
+if True:
 
-    for run in range(1, runs_per_enemy + 1):
+    group = 1
+    env = envs[1]
 
-        mate_prob = 0.0
-        mut_prob = 1.0
+    for run in range(2, runs_per_enemy + 1):
+
+        mate_prob = .15
+        mut_prob = .85
 
         # Redefine output folder for every run
         exp_path_run = output_folder + experiment_name + '_gr' + str(group+1) + '_run' + str(run)
@@ -164,8 +164,8 @@ for group, env in enumerate(envs):
 
         for i in range(1, generations + 1):
 
-            mate_prob += 1/generations
-            mut_prob -= 1/generations
+            mate_prob += .7/generations
+            mut_prob -= .7/generations
 
             # Select the next generation individuals using 2 types of selection operators
             offspring1 = tbx.select1(pop, len(pop))
@@ -184,7 +184,6 @@ for group, env in enumerate(envs):
             for mutant in offspring:
                 if np.random.rand() < mut_prob:
                     tbx.mutate(mutant)
-                    mutant.self = np.linalg.norm(mutant) # normalize
                     del mutant.fitness.values
 
             print("\n ----- GENERATION {0} -----".format(i))
