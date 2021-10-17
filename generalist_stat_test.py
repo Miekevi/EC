@@ -1,12 +1,16 @@
 import numpy as np
+import scikit_posthocs as sp
 import ast
 
 from scipy.stats import kruskal
+
 
 ########### initializing script variables ##########
 
 expnames = ["gen_1", "gen_2"]
 group_enemies = [[2, 5, 6], [7, 8]]
+runs_per_enemy = 10         # experiments must have at least this amount of runs
+generations_per_run = 50    # experiments must have at least this amount of generations
 a = []
 
 # prints the Kruskal Wallis results per group, per EA to see if the means are significantly different
@@ -19,3 +23,5 @@ for group, enemies in enumerate(group_enemies):
 F, p = kruskal(a[0], a[1], a[2], a[3])
 print(F)
 print(p)
+
+print(sp.posthoc_conover(a, p_adjust='holm'))    # post-hoc comparison using the Holm procedure
