@@ -33,7 +33,6 @@ generations = 50  # number of generations
 early_stopping = 100  # stop if fitness hasn't improved for x rounds
 dom_u = 1  # upper bound weight
 dom_l = -1  # lower bound weight
-tournament_size = 10  # individuals participating in tournament
 # mate_prob = 0.5       # dynamic; see line 189 and 229
 # mut_prob = 0.2        # dynamic; see line 190 and 230
 mut_gene_prob = 0.2  # mutation prob for each gene
