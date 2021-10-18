@@ -18,7 +18,9 @@ for group, enemies in enumerate(group_enemies):
     for i, expname in enumerate(expnames):
         means_gen_str = open("outputs/" + expname + "_gr" + str(group + 1) + "_eval/means_gen.txt", "r").readline()
         means_gen = np.array(ast.literal_eval(means_gen_str))[:generations_per_run]
+        mean = np.mean(means_gen)
         a.append(means_gen)
+        print(mean)
 
 F, p = kruskal(a[0], a[1], a[2], a[3])
 print(F)
